@@ -1,6 +1,6 @@
 # HTX ASR Project
 
-This repository contains the solution to the HTX Technical Test, focusing on:
+This repository contains
 
 - An Automatic Speech Recognition (ASR) microservice using `wav2vec2-large-960h`
 - A 2-node Elasticsearch backend for indexing transcripts
@@ -99,9 +99,9 @@ pip install -r requirements.txt
 
 Run the ASR microservice
 
-In another terminal ,navigate to the htx-project folder.
+In another terminal ,navigate to the project folder.
 
-( if having ffmpeg issues, install ffmpeg to path and run from command prompt instead of bash)
+( if having ffmpeg issues, install ffmpeg to path)
 
 ```
 source ./venv/Scripts/activate # if using virtual environment
@@ -133,28 +133,40 @@ docker compose up -d --build
 | Search UI       | http://localhost:3000       | Web search interface               |
 
 
-![alt text](images/ping.png)
-
-![alt text](images/sampleasr.png)
-
 ## Example Curl Command
 
 ```
 curl -X POST      -F "file=@/path/to/sample.mp3"      http://localhost:8001/asr
 ```
 
-May run this command to create index before running docker compose, if want to manage 1 less container.
+Run this command to create index.
 
 ```
 python elastic-backend/cv-index.py
 ```
-
 
 ## Deployment Architecture
 
 The application was split into four different EC2 instances, with Search UI, ASR API, and Elasticsearch nodes split into different instances. This ensures high availability of the application. To reduce complexity and deployment time, a single docker-compose.yml is reused across 3 EC2 instances. Each machine only runs the services it needs via docker compose up service-name. 
 
 This approach simplifies deployment by maintaining a single configuration file, optimizes resource usage by running only necessary services per instance, improves fault isolation to minimize downtime, and enables independent scaling and easier debugging of each component.
+
+```
+graph TD
+    User((User / Browser)) -->|Port 3000| EC2_D
+
+    subgraph AWS VPC
+        EC2_D["<b>EC2-D: Web Frontend</b><br/>Service: search-ui"]
+        EC2_C["<b>EC2-C: ASR & Indexer</b><br/>Services: asr (Port 8001), cv-index"]
+        EC2_A["<b>EC2-A: Elasticsearch Node 1</b><br/>Service: elasticsearch1 (Port 9200)"]
+        EC2_B["<b>EC2-B: Elasticsearch Node 2</b><br/>Service: elasticsearch2 (Port 9200)"]
+
+        EC2_D -->|Search & Filter Queries| EC2_A
+        EC2_C -->|Index Transcripts| EC2_A
+        EC2_A <-->|Cluster Sync & Replication| EC2_B
+    end
+```
+
 
 | EC2 Instance | Role                        | Services                |
 |--------------|-----------------------------|-------------------------|
@@ -175,7 +187,4 @@ See `deployment-design/design.pdf` for the full AWS diagram.
 
 - http://ec2-54-255-152-4.ap-southeast-1.compute.amazonaws.com:3000/
 
-## License
-
-By 
-provided by HTX for technical assessment purposes.
+(link unavailable at the moment due to deletion of VMs)
