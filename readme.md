@@ -151,15 +151,15 @@ The application was split into four different EC2 instances, with Search UI, ASR
 
 This approach simplifies deployment by maintaining a single configuration file, optimizes resource usage by running only necessary services per instance, improves fault isolation to minimize downtime, and enables independent scaling and easier debugging of each component.
 
-```
+```mermaid
 graph TD
     User((User / Browser)) -->|Port 3000| EC2_D
 
-    subgraph AWS VPC
-        EC2_D["<b>EC2-D: Web Frontend</b><br/>Service: search-ui"]
-        EC2_C["<b>EC2-C: ASR & Indexer</b><br/>Services: asr (Port 8001), cv-index"]
-        EC2_A["<b>EC2-A: Elasticsearch Node 1</b><br/>Service: elasticsearch1 (Port 9200)"]
-        EC2_B["<b>EC2-B: Elasticsearch Node 2</b><br/>Service: elasticsearch2 (Port 9200)"]
+    subgraph AWS_VPC["AWS VPC"]
+        EC2_D["EC2-D: Web Frontend<br/>Service: search-ui"]
+        EC2_C["EC2-C: ASR & Indexer<br/>Services: asr (Port 8001), cv-index"]
+        EC2_A["EC2-A: Elasticsearch Node 1<br/>Service: elasticsearch1 (Port 9200)"]
+        EC2_B["EC2-B: Elasticsearch Node 2<br/>Service: elasticsearch2 (Port 9200)"]
 
         EC2_D -->|Search & Filter Queries| EC2_A
         EC2_C -->|Index Transcripts| EC2_A
